@@ -9,7 +9,7 @@ const BEST_KEY = 'redline-run-best'
 const SEG = 12
 const SEG_COUNT = 18
 const LANE = 1.62
-const ROAD_Y = 0.48
+const ROAD_Y = 0.16
 const GRAVITY = 24
 const JUMP_V = 8.6
 const STAND_H = 1.02
@@ -18,43 +18,27 @@ const CAR_HALF_W = 0.52
 const CAR_HALF_D = 1.05
 
 const GLTF_FILES = {
-  road: 'roads/Road1.glb',
-  rail: 'roads/road_barier_2a.glb',
+  palm: 'beach/palm.glb',
+  tree: 'beach/tree.glb',
+  lamp: 'beach/lamp.glb',
   barrier: 'roads/road_barrier_1.glb',
   cone: 'roads/hazzard_cone_1.glb',
   barrel: 'roads/traffic_barell_1.glb',
-  tree3: 'roads/Tree3.glb',
-  tree4: 'roads/Tree4.glb',
-  bush1: 'roads/bush_1.glb',
-  lamp: 'roads/lamp_1.glb',
-  lamp2: 'roads/lamp_2.glb',
-  treeA: 'roads/tree_1_a.glb',
   coin: 'world/Coin.gltf',
   gem: 'world/Gem_Blue.gltf',
   star: 'world/Star.gltf',
   crate: 'world/Cube_Crate.gltf',
   spikes: 'world/Spikes.gltf',
   saw: 'world/Hazard_Saw.gltf',
-  plant: 'world/Plant_Small.gltf',
-  plantL: 'world/Plant_Large.gltf',
   rock: 'world/Rock_1.gltf',
   rock2: 'world/Rock_2.gltf',
-  tree: 'world/Tree.gltf',
-  bush: 'world/Bush.gltf',
-  grass1: 'world/Grass_1.gltf',
-  grass2: 'world/Grass_2.gltf',
-  grass3: 'world/Grass_3.gltf',
   cloud1: 'world/Cloud_1.gltf',
   cloud2: 'world/Cloud_2.gltf',
   cloud3: 'world/Cloud_3.gltf',
-  hill: 'world/RockPlatforms_Large.gltf',
   bee: 'world/Bee.gltf',
   crab: 'world/Crab.gltf',
 }
 
-const TREES = ['tree', 'tree3', 'tree4', 'treeA']
-const BUSHES = ['bush', 'bush1', 'plant', 'plantL']
-const GRASSES = ['grass1', 'grass2', 'grass3']
 const CLOUDS = ['cloud1', 'cloud2', 'cloud3']
 
 const LESSONS = [
@@ -103,13 +87,13 @@ document.body.prepend(renderer.domElement)
 
 const scene = new THREE.Scene()
 scene.background = makeSky()
-scene.fog = new THREE.Fog(0xd7eec4, 34, 118)
+scene.fog = new THREE.Fog(0xc7e8fb, 42, 140)
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 260)
-scene.add(new THREE.AmbientLight(0xffffff, 0.38))
-scene.add(new THREE.HemisphereLight(0xd7ecff, 0x6aaa4e, 0.95))
-const sun = new THREE.DirectionalLight(0xfff2d2, 1.55)
-sun.position.set(-12, 18, 14)
+scene.add(new THREE.AmbientLight(0xfff6e8, 0.46))
+scene.add(new THREE.HemisphereLight(0xcfe9ff, 0xe7c98a, 1.05))
+const sun = new THREE.DirectionalLight(0xfff3cf, 1.85)
+sun.position.set(-16, 28, 12)
 sun.castShadow = true
 sun.shadow.mapSize.set(2048, 2048)
 sun.shadow.camera.near = 1
@@ -128,15 +112,15 @@ const sunBall = new THREE.Mesh(
   new THREE.SphereGeometry(6, 14, 10),
   new THREE.MeshBasicMaterial({ color: 0xffe39a }),
 )
-sunBall.position.set(-48, 30, -96)
+sunBall.position.set(-58, 42, -110)
 scene.add(sunBall)
 
 const farGround = new THREE.Mesh(
-  new THREE.PlaneGeometry(420, 420),
-  new THREE.MeshLambertMaterial({ color: 0x5c9a3e }),
+  new THREE.PlaneGeometry(520, 520),
+  new THREE.MeshLambertMaterial({ color: 0x1a93d6 }),
 )
 farGround.rotation.x = -Math.PI / 2
-farGround.position.y = -0.22
+farGround.position.y = -0.55
 farGround.receiveShadow = true
 scene.add(farGround)
 
@@ -155,11 +139,18 @@ const laneQueue = []
 const tmp = new THREE.Vector3()
 const clock = new THREE.Clock()
 
-const groundGeo = new THREE.PlaneGeometry(96, SEG + 0.25)
-groundGeo.rotateX(-Math.PI / 2)
-const groundMat = new THREE.MeshLambertMaterial({ color: 0x7ec24f })
-const dashGeo = new THREE.BoxGeometry(0.09, 0.03, 1.45)
-const dashMat = new THREE.MeshBasicMaterial({ color: 0xf3e6b0 })
+const sandGeo = new THREE.PlaneGeometry(30, SEG + 0.3)
+sandGeo.rotateX(-Math.PI / 2)
+const sandMat = new THREE.MeshLambertMaterial({ color: 0xe6c57a })
+const asphaltGeo = new THREE.BoxGeometry(7.2, ROAD_Y, SEG)
+const asphaltMat = new THREE.MeshLambertMaterial({ color: 0x1c6ed8 })
+const curbGeo = new THREE.BoxGeometry(0.2, 0.24, SEG)
+const curbMat = new THREE.MeshLambertMaterial({ color: 0xf6f3ec })
+const edgeGeo = new THREE.BoxGeometry(0.09, 0.02, SEG)
+const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff })
+const dashGeo = new THREE.BoxGeometry(0.12, 0.02, 1.7)
+const duneGeo = new THREE.SphereGeometry(1, 7, 5)
+const duneMat = new THREE.MeshLambertMaterial({ color: 0xd4ae62 })
 const bitGeo = new THREE.BoxGeometry(0.14, 0.14, 0.14)
 const coinBit = new THREE.MeshBasicMaterial({ color: 0xffd15c })
 const gemBit = new THREE.MeshBasicMaterial({ color: 0x49b6ff })
@@ -243,6 +234,7 @@ async function boot() {
     await Promise.all(names.map(async (name) => {
       const gltf = await loader.loadAsync(BASE + GLTF_FILES[name])
       flatten(gltf.scene)
+      if (name === 'lamp') glowLamp(gltf.scene)
       models[name] = gltf
       mark()
     }))
@@ -460,57 +452,64 @@ function recycleSegments() {
 function dressSegment(seg) {
   for (let i = seg.children.length - 1; i >= 0; i--) seg.remove(seg.children[i])
 
-  const road = models.road.scene.clone(true)
-  road.traverse((o) => { if (o.isMesh) o.receiveShadow = true })
+  const sand = new THREE.Mesh(sandGeo, sandMat)
+  sand.position.y = -0.02
+  sand.receiveShadow = true
+  seg.add(sand)
+
+  const road = new THREE.Mesh(asphaltGeo, asphaltMat)
+  road.position.y = ROAD_Y / 2
+  road.receiveShadow = true
   seg.add(road)
 
-  const ground = new THREE.Mesh(groundGeo, groundMat)
-  ground.position.y = -0.04
-  ground.receiveShadow = true
-  seg.add(ground)
-
   for (const side of [-1, 1]) {
-    for (const z of [-3, 3]) {
-      const rail = prop('rail', { height: 0.78, width: 6.05, yaw: Math.PI / 2 })
-      rail.position.set(side * 6.2, 0.02, z)
-      seg.add(rail)
-    }
-    const lamp = prop(Math.random() < 0.5 ? 'lamp' : 'lamp2', { height: rand(3.6, 4.6) })
-    lamp.position.set(side * rand(7.4, 8.4), 0, rand(-4, 4))
-    if (Math.random() < 0.65) seg.add(lamp)
+    const curb = new THREE.Mesh(curbGeo, curbMat)
+    curb.position.set(side * 3.7, 0.12, 0)
+    curb.castShadow = true
+    curb.receiveShadow = true
+    seg.add(curb)
 
-    for (let n = 0; n < 3; n++) {
-      const tree = prop(pick(TREES), { height: rand(3.2, 5.8), yaw: rand(0, Math.PI * 2) })
-      tree.position.set(side * rand(9.5, 16), 0, rand(-SEG / 2, SEG / 2))
-      seg.add(tree)
-    }
+    const edge = new THREE.Mesh(edgeGeo, lineMat)
+    edge.position.set(side * 3.38, ROAD_Y + 0.012, 0)
+    seg.add(edge)
+
+    const lamp = prop('lamp', { height: rand(3.3, 4.1), yaw: -side * Math.PI / 2 })
+    lamp.position.set(side * 4.5, 0, rand(-3.2, 3.2))
+    lamp.traverse((o) => { if (o.isMesh) o.castShadow = true })
+    seg.add(lamp)
+
     for (let n = 0; n < 2; n++) {
-      const bush = prop(pick(BUSHES), { height: rand(0.8, 1.7), yaw: rand(0, 6) })
-      bush.position.set(side * rand(7.1, 11), 0, rand(-SEG / 2, SEG / 2))
-      seg.add(bush)
+      const palm = prop('palm', { height: rand(4.8, 6.6), yaw: rand(0, Math.PI * 2) })
+      palm.position.set(side * rand(6.4, 8.6), 0, rand(-SEG / 2 + 0.5, SEG / 2 - 0.5))
+      palm.traverse((o) => { if (o.isMesh) o.castShadow = true })
+      seg.add(palm)
     }
-    for (let n = 0; n < 5; n++) {
-      const grass = prop(pick(GRASSES), { height: rand(0.35, 0.7), yaw: rand(0, 6) })
-      grass.position.set(side * rand(6.5, 14), 0, rand(-SEG / 2, SEG / 2))
-      seg.add(grass)
-    }
-    if (Math.random() < 0.55) {
-      const hill = prop('hill', { height: rand(6, 11), yaw: rand(0, 6) })
-      hill.position.set(side * rand(30, 40), 0, rand(-4, 4))
-      seg.add(hill)
+
+    const tree = prop('tree', { height: rand(3.5, 5.2), yaw: rand(0, Math.PI * 2) })
+    tree.position.set(side * rand(9.4, 12.4), 0, rand(-SEG / 2, SEG / 2))
+    tree.traverse((o) => { if (o.isMesh) o.castShadow = true })
+    seg.add(tree)
+
+    if (Math.random() < 0.75) {
+      const dune = new THREE.Mesh(duneGeo, duneMat)
+      dune.scale.set(rand(2.4, 4.2), rand(0.35, 0.75), rand(1.6, 2.8))
+      dune.position.set(side * rand(13.4, 14.8), -0.08, rand(-4, 4))
+      dune.castShadow = true
+      dune.receiveShadow = true
+      seg.add(dune)
     }
   }
 
-  if (Math.random() < 0.85) {
-    const cloud = prop(pick(CLOUDS), { height: rand(2.2, 3.6) })
-    cloud.position.set(rand(-16, 16), rand(13, 20), rand(-SEG / 2, SEG / 2))
+  if (Math.random() < 0.7) {
+    const cloud = prop(pick(CLOUDS), { height: rand(2.4, 4) })
+    cloud.position.set(rand(-22, 22), rand(14, 22), rand(-SEG / 2, SEG / 2))
     seg.add(cloud)
   }
 
   for (const x of [-LANE / 2, LANE / 2]) {
     for (let i = 0; i < 3; i++) {
-      const dash = new THREE.Mesh(dashGeo, dashMat)
-      dash.position.set(x, 0.5, -4.2 + i * 4.2)
+      const dash = new THREE.Mesh(dashGeo, lineMat)
+      dash.position.set(x, ROAD_Y + 0.014, -4.2 + i * 4.2)
       seg.add(dash)
     }
   }
@@ -921,6 +920,19 @@ function burst(pos, kind) {
   }
 }
 
+function glowLamp(root) {
+  root.traverse((o) => {
+    if (!o.isMesh || !o.material) return
+    const mats = Array.isArray(o.material) ? o.material : [o.material]
+    mats.forEach((m) => {
+      if (m.name !== 'Bulb' || !m.emissive) return
+      m.emissive.set(0xffd36a)
+      m.emissiveIntensity = 1.6
+      if (m.color) m.color.set(0xffe7a8)
+    })
+  })
+}
+
 function flatten(root) {
   root.traverse((o) => {
     if (!o.isMesh || !o.material) return
@@ -1014,10 +1026,10 @@ function makeSky() {
   canvas.height = 256
   const g = canvas.getContext('2d')
   const grd = g.createLinearGradient(0, 0, 0, 256)
-  grd.addColorStop(0, '#6eb6f2')
-  grd.addColorStop(0.42, '#b7dcfc')
-  grd.addColorStop(0.7, '#f6e4c6')
-  grd.addColorStop(1, '#d9f0c2')
+  grd.addColorStop(0, '#3d9aee')
+  grd.addColorStop(0.38, '#8fd4ff')
+  grd.addColorStop(0.68, '#fff3d2')
+  grd.addColorStop(1, '#ffe7b0')
   g.fillStyle = grd
   g.fillRect(0, 0, 16, 256)
   const tex = new THREE.CanvasTexture(canvas)

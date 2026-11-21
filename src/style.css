@@ -30,7 +30,7 @@ button, kbd { font-family: inherit; }
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 48%, rgba(16, 28, 18, 0.38) 100%);
+  background: radial-gradient(ellipse at center, transparent 48%, rgba(12, 48, 82, 0.28) 100%);
 }
 
 #flash {
